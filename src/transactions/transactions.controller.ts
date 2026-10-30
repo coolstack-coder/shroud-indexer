@@ -18,6 +18,7 @@ import {
     TXID_THROTTLE_TTL_MS,
 } from '@/common/constants';
 
+const MAX_UINT32 = 0xffffffff;
 const TXID_REGEX = /^[0-9a-fA-F]{64}$/;
 
 @Controller('transactions')
@@ -82,6 +83,15 @@ export class TransactionController {
     async getBlockHeightByTimestamp(
         @Query('timestamp', ParseIntPipe) timestamp: number,
     ) {
+        // Block times are uint32 seconds and the lookup seeks from
+        // timestamp + 1, so anything at or past the uint32 max (most often a
+        // millisecond timestamp) would throw while encoding the key.
+        if (timestamp < 0 || timestamp >= MAX_UINT32) {
+            throw new BadRequestException(
+                'timestamp must be a unix time in seconds',
+            );
+        }
+
         return await this.transactionsService.getBlockHeightByTimestamp(
             timestamp,
         );
