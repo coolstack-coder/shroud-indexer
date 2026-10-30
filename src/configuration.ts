@@ -38,24 +38,27 @@ export function mergeEnvVariablesRecursive(
     }
 }
 
-export default () => {
-    const config = load(readFileSync(getConfigFilePath(), 'utf8')) as Record<
-        string,
-        any
-    >;
-    mergeEnvVariablesRecursive(config);
-
-    const validateConfig = plainToClass(Config, config, {
+export function validateConfig(config: Record<string, any>) {
+    const configInstance = plainToClass(Config, config, {
         enableImplicitConversion: true,
     });
 
-    const errors = validateSync(validateConfig, {
+    const errors = validateSync(configInstance, {
         skipMissingProperties: true,
     });
 
     if (errors.length > 0) {
         throw new Error(errors.toString());
     }
+}
+
+export default () => {
+    const config = load(readFileSync(getConfigFilePath(), 'utf8')) as Record<
+        string,
+        any
+    >;
+    mergeEnvVariablesRecursive(config);
+    validateConfig(config);
 
     return config;
 };
