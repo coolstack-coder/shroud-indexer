@@ -43,9 +43,9 @@ export function validateConfig(config: Record<string, any>) {
         enableImplicitConversion: true,
     });
 
-    const errors = validateSync(configInstance, {
-        skipMissingProperties: true,
-    });
+    // Missing keys must fail too: a required value that is absent (or
+    // misspelled) would otherwise skip every check on it.
+    const errors = validateSync(configInstance);
 
     if (errors.length > 0) {
         throw new Error(errors.toString());
