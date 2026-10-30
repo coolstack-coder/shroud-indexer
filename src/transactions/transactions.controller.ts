@@ -18,6 +18,8 @@ import {
     TXID_THROTTLE_TTL_MS,
 } from '@/common/constants';
 
+const TXID_REGEX = /^[0-9a-fA-F]{64}$/;
+
 @Controller('transactions')
 export class TransactionController {
     constructor(private readonly transactionsService: TransactionsService) {}
@@ -92,6 +94,14 @@ export class TransactionController {
         default: { ttl: TXID_THROTTLE_TTL_MS, limit: TXID_THROTTLE_LIMIT },
     })
     async getTransactionByTxid(@Param('txid') txid: string) {
+        // Checked here so a malformed txid is a 400, not an RPC error from
+        // the node surfacing as a 500.
+        if (!TXID_REGEX.test(txid)) {
+            throw new BadRequestException(
+                'txid must be a 64 character hex string',
+            );
+        }
+
         const transaction = await this.transactionsService.getTransactionByTxid(
             txid,
         );
