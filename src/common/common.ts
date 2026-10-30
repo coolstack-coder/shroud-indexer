@@ -13,8 +13,8 @@ export const camelToSnakeCase = (inputString: string) => {
         .toUpperCase();
 };
 
-const verifyPubKey = (pubKey: Buffer): boolean => {
-    return pubKey.length === 33 && publicKeyVerify(pubKey);
+const verifyPubKey = (pubKey: Buffer | undefined): boolean => {
+    return pubKey?.length === 33 && publicKeyVerify(pubKey);
 };
 
 const hash160 = (buffer: Buffer): Buffer => {
